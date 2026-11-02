@@ -47,6 +47,17 @@ final class FeedStore {
     var posts: [Post] = SampleData.posts
     let currentUser = SampleData.me
 
+    /// Prototype: the open hour starts when the app launches and lasts 60 minutes.
+    var openUntil = Date().addingTimeInterval(60 * 60)
+    /// True when the open hour is over and the app is locked.
+    var isClosed = false
+
+    /// Prototype only: start a fresh open hour so the demo can continue.
+    func reopenForDemo() {
+        openUntil = Date().addingTimeInterval(60 * 60)
+        isClosed = false
+    }
+
     func post(_ id: Post.ID) -> Post? {
         posts.first { $0.id == id }
     }
@@ -89,8 +100,9 @@ enum SampleData {
     static let nina   = UserProfile(id: "ninapark", name: "Nina Park")
     static let jordan = UserProfile(id: "jordanlee", name: "Jordan Lee")
 
-    /// The shared daily break everyone in the region takes.
-    static let breakWindow = "2:00–3:00 PM"
+    /// The one hour a day the app is open, shared by everyone in the region.
+    static let openHour = "2:00–3:00 PM"
+    static let openHourStart = 14   // 2 PM, 24-hour clock
 
     static let posts: [Post] = [
         Post(

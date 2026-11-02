@@ -1,6 +1,6 @@
 # Social: HCI Design Project, Team 9 (Feature Finders)
 
-A social media app that helps people spend less time on their phones. Everyone in a region shares the same daily one-hour break, so nobody is posting while you're away and there's nothing to miss.
+A social media app that helps people spend less time on their phones. The app is only open for one hour a day, at the same time for everyone in a region. Everyone is online together, and the rest of the day nobody is posting, so there's nothing to miss.
 
 Built with **SwiftUI** and run on iPhone with **[xtool](https://github.com/xtool-org/xtool)**.
 
@@ -12,9 +12,9 @@ Built with **SwiftUI** and run on iPhone with **[xtool](https://github.com/xtool
 | Moderate: create a post | 🔜 Next |
 | Complex: create and verify an account | 🔜 Next |
 
-**Working now:** home feed, post detail (photo carousel, like, save, follow, comments, reply, like comments), profile with posts and saved grid, break info, "Time for a pause" lockout screen (tap the *Break window* banner on the feed).
+**Working now:** home feed, post detail (photo carousel, like, save, follow, comments, reply, like comments), profile with posts and saved grid, open hour info, and the open hour itself: the feed banner counts down the hour, and when it ends the whole app locks with a "Time for a pause" screen that counts down to the next open hour. For the demo, the open hour starts when the app launches; tap the *Open hour* banner to close it early and see the lock screen.
 
-**Hardcoded data:** five sample users (Maya, Sam, Alex, Nina, Jordan) and their posts, comments, like counts, six bundled photos, the current user's profile, and the 2:00–3:00 PM break window. Nothing is saved between launches.
+**Hardcoded data:** five sample users (Maya, Sam, Alex, Nina, Jordan) and their posts, comments, like counts, six bundled photos, the current user's profile, and the 2:00–3:00 PM open hour. Nothing is saved between launches.
 
 ## Running it on an iPhone
 
@@ -39,8 +39,8 @@ Sources/SocialApp/
   Model/Models.swift           Data types, FeedStore, hardcoded sample data
   Views/FeedView.swift         Home feed (simple task)
   Views/PostDetailView.swift   Post detail and comments
-  Views/ProfileView.swift      Profile, saved posts, break info
-  Views/OtherViews.swift       Pause screen, "coming next" placeholder tabs
+  Views/ProfileView.swift      Profile, saved posts, open hour info
+  Views/OtherViews.swift       Lock screen (app closed), "coming next" placeholder tabs
   Resources/*.jpg              Sample photos
 ```
 

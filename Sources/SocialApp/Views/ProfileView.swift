@@ -3,7 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(FeedStore.self) private var store
     @State private var showingSaved = false
-    @State private var showBreakInfo = false
+    @State private var showOpenHourInfo = false
 
     /// The current user's own posts (hardcoded for the prototype).
     private let myPhotos = ["park", "coffee", "pottery", "picnic", "coast", "flowers",
@@ -21,7 +21,7 @@ struct ProfileView: View {
 
                     HStack(spacing: 10) {
                         PillButton(title: "Edit profile", systemImage: "pencil", isActive: true) {}
-                        PillButton(title: "Break", systemImage: "clock", isActive: true) { showBreakInfo = true }
+                        PillButton(title: "Open hour", systemImage: "clock", isActive: true) { showOpenHourInfo = true }
                     }
 
                     HStack(spacing: 10) {
@@ -36,8 +36,8 @@ struct ProfileView: View {
             }
         }
         .background(Theme.background)
-        .sheet(isPresented: $showBreakInfo) {
-            BreakInfoSheet()
+        .sheet(isPresented: $showOpenHourInfo) {
+            OpenHourInfoSheet()
                 .presentationDetents([.medium])
         }
     }
@@ -127,30 +127,30 @@ struct PillButton: View {
     }
 }
 
-struct BreakInfoSheet: View {
+struct OpenHourInfoSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("SHARED BREAK")
+            Text("SHARED OPEN HOUR")
                 .font(.caption2.weight(.semibold))
                 .tracking(0.8)
                 .foregroundStyle(Theme.green)
-            Text("Everyone takes a break together")
+            Text("Everyone's online at the same time")
                 .font(.title3.weight(.semibold))
-            Text("Every day, the feed, posts and profiles close for one hour for everyone in your region. Nobody is posting while you're away, so there's nothing to miss.")
+            Text("Social only opens for one hour a day, at the same time for everyone in your region. The rest of the day it's closed, so you never miss anything, and you get to talk with friends in real time.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.secondary)
             HStack {
                 Image(systemName: "clock")
-                Text("Today, \(SampleData.breakWindow)")
+                Text("Every day, \(SampleData.openHour)")
                     .fontWeight(.semibold)
             }
             .foregroundStyle(Theme.green)
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.tint, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            Text("Voting on your region's break hour is coming in the next build.")
+            Text("Voting on your region's open hour is coming in the next build.")
                 .font(.footnote)
                 .foregroundStyle(Theme.secondary)
             Spacer()

@@ -1,13 +1,15 @@
 import SwiftUI
 import UIKit
 
-/// The lockout screen shown during the shared break.
-/// In the prototype it opens when you tap the "Break window" banner.
-struct PauseView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var breakEnds = Date().addingTimeInterval(60 * 60)
+/// The lock screen shown whenever the open hour is over.
+/// Social is only open for one hour a day, at the same time for everyone.
+struct ClosedView: View {
+    @Environment(FeedStore.self) private var store
 
     var body: some View {
+        let nextOpen = Self.nextOpenHour(after: Date())
+        let day = Calendar.current.isDateInToday(nextOpen) ? "today" : "tomorrow"
+
         VStack(spacing: 0) {
             AppHeader()
 
@@ -29,20 +31,20 @@ struct PauseView: View {
                     .font(.title.weight(.semibold))
                     .foregroundStyle(Theme.text)
 
-                Text("Your feed, posts and profile reopen at 3:00 PM.")
+                Text("Social is open for one hour a day. Your feed, posts and profile reopen \(day) at 2:00 PM.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.secondary)
                     .multilineTextAlignment(.center)
 
                 VStack(spacing: 4) {
-                    Text("Current break")
+                    Text("Next open hour")
                         .font(.caption)
                         .foregroundStyle(Theme.secondary)
-                    Text(SampleData.breakWindow)
+                    Text(SampleData.openHour)
                         .font(.system(size: 30, weight: .regular))
                         .foregroundStyle(Theme.text)
                     TimelineView(.periodic(from: .now, by: 1)) { context in
-                        Text(remaining(at: context.date))
+                        Text(Self.countdown(from: context.date, to: nextOpen))
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(Theme.secondary)
                     }
@@ -51,7 +53,7 @@ struct PauseView: View {
                 .padding(.vertical, 16)
                 .card()
 
-                Text("Read a chapter or take a short walk. Your feed can wait.")
+                Text("Read a chapter or take a short walk. Nobody is posting until then, so there's nothing to miss.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.text)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -62,8 +64,8 @@ struct PauseView: View {
 
             Spacer()
 
-            // Real breaks can't be skipped. This exists only so the demo can continue.
-            Button("Prototype only: end break") { dismiss() }
+            // The real app can't be reopened early. This exists only so the demo can continue.
+            Button("Prototype only: reopen app") { store.reopenForDemo() }
                 .font(.footnote)
                 .foregroundStyle(Theme.secondary)
                 .padding(.bottom, 16)
@@ -72,9 +74,17 @@ struct PauseView: View {
         .background(Theme.background)
     }
 
-    private func remaining(at date: Date) -> String {
-        let seconds = max(0, Int(breakEnds.timeIntervalSince(date)))
-        return String(format: "%d:%02d remaining", seconds / 60, seconds % 60)
+    static func nextOpenHour(after date: Date) -> Date {
+        Calendar.current.nextDate(
+            after: date,
+            matching: DateComponents(hour: SampleData.openHourStart, minute: 0, second: 0),
+            matchingPolicy: .nextTime
+        ) ?? date.addingTimeInterval(24 * 60 * 60)
+    }
+
+    static func countdown(from now: Date, to target: Date) -> String {
+        let seconds = max(0, Int(target.timeIntervalSince(now)))
+        return String(format: "Opens in %d:%02d:%02d", seconds / 3600, (seconds % 3600) / 60, seconds % 60)
     }
 }
 

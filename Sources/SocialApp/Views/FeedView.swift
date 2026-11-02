@@ -4,7 +4,6 @@ import SwiftUI
 struct FeedView: View {
     @Environment(FeedStore.self) private var store
     @State private var path: [Post.ID] = []
-    @State private var showPause = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -18,7 +17,8 @@ struct FeedView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 14) {
-                        BreakBanner { showPause = true }
+                        // Prototype: tapping the banner ends the open hour early to show the lock screen.
+                        OpenHourBanner(closesAt: store.openUntil) { store.isClosed = true }
 
                         ForEach(store.posts) { post in
                             PostCard(post: post) { path.append(post.id) }
@@ -37,13 +37,12 @@ struct FeedView: View {
                 PostDetailView(postID: id)
             }
         }
-        .fullScreenCover(isPresented: $showPause) {
-            PauseView()
-        }
     }
 }
 
-struct BreakBanner: View {
+/// Shows that the app is open right now and how long until it closes.
+struct OpenHourBanner: View {
+    let closesAt: Date
     var action: () -> Void
 
     var body: some View {
@@ -52,16 +51,22 @@ struct BreakBanner: View {
                 Image(systemName: "clock")
                     .font(.system(size: 18))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Break window")
+                    Text("Open hour")
                         .font(.footnote.weight(.semibold))
-                    Text("Today, \(SampleData.breakWindow) · one-hour app break")
+                    Text("Today, \(SampleData.openHour) · everyone's online")
                         .font(.caption)
                         .foregroundStyle(Theme.secondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Theme.secondary)
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(timeLeft(at: context.date))
+                            .font(.footnote.weight(.semibold).monospacedDigit())
+                        Text("left")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.secondary)
+                    }
+                }
             }
             .foregroundStyle(Theme.green)
             .padding(.horizontal, 14)
@@ -69,6 +74,11 @@ struct BreakBanner: View {
             .background(Theme.tint, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+    }
+
+    private func timeLeft(at date: Date) -> String {
+        let seconds = max(0, Int(closesAt.timeIntervalSince(date)))
+        return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
 }
 
