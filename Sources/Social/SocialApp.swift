@@ -18,7 +18,7 @@ struct Primary: ButtonStyle {
 }
 struct Brand: View {
     var body: some View {
-        HStack { Image(systemName: "circle.dashed").foregroundColor(forest); Text("Social").font(.headline); Spacer() }
+        HStack { Image(systemName: "circle.dashed").foregroundColor(forest); Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "One Hour").font(.headline); Spacer() }
             .padding(.horizontal, 20).padding(.vertical, 10).background(paper)
     }
 }
