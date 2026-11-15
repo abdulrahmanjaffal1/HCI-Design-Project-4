@@ -1,17 +1,11 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.8
 import PackageDescription
 
 let package = Package(
-    name: "SocialApp",
-    platforms: [.iOS(.v17)],
-    products: [
-        .library(name: "SocialApp", targets: ["SocialApp"]),
-    ],
-    targets: [
-        .target(
-            name: "SocialApp",
-            resources: [.process("Resources")]
-        ),
-    ],
-    swiftLanguageModes: [.v5]
+    name: "Social",
+    platforms: [.iOS(.v16)],
+    products: [.library(name: "Social", targets: ["Social"])],
+    dependencies: [.package(path: "Core")],
+    targets: [.target(name: "Social", dependencies: [.product(name: "BreakClock", package: "Core")],
+                      resources: [.copy("Photos")])]
 )

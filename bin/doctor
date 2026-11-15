@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -u
+fail=0
+for cmd in swift xtool idevice_id; do
+  command -v "$cmd" || { echo "Missing $cmd"; fail=1; }
+done
+if command -v swift >/dev/null; then
+  swift --version
+  swift --version | grep -Eq 'Swift version 6\.4([. -]|$)' || { echo "Use the Swift 6.4 container described in README.md for this xtool release."; fail=1; }
+  swift sdk list | grep -i darwin || { echo "No darwin SDK found. Run xtool setup with the matching Xcode.xip."; fail=1; }
+fi
+if command -v xtool >/dev/null; then xtool --help >/dev/null || fail=1; fi
+if command -v idevice_id >/dev/null; then
+  devices=$(idevice_id -l)
+  [[ -n "$devices" ]] && echo "$devices" || echo "No iPhone detected. Check USB, trust and the host usbmuxd service before installing."
+fi
+exit "$fail"

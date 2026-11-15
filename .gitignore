@@ -1,0 +1,13 @@
+.build/
+.swiftpm/
+.direnv/
+.tooling/
+*.xip
+*.ipa
+.DS_Store
+
+.build/
+.bsp/
+.direnv/
+*.log
+*.xip
