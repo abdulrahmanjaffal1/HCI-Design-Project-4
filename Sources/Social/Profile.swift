@@ -17,12 +17,12 @@ struct Profile: View {
                     Button("Switch account") { switching = true }
                         .confirmationDialog("Switch account", isPresented: $switching, titleVisibility: .visible) {
                             ForEach(store.data.people.filter { $0.handle != person.handle && store.data.remembered.contains($0.handle) }) { account in
-                                Button("@" + account.handle) { store.change { $0.activate(account, demo: StudyConfiguration.acceleratedBreak) } }
+                                Button("@" + account.handle) { store.change { $0.activate(account) } }
                             }
                             Button("Log in to another account") { store.change { $0.active = nil } }
                             Button("Cancel", role: .cancel) {}
                         }
-                    NavigationLink(destination: BreakMenu()) { Label("Break", systemImage: "clock").frame(maxWidth: .infinity).padding().background(sage).cornerRadius(14) }
+                    NavigationLink(destination: OpenHourMenu()) { Label("1-hour open period", systemImage: "clock").frame(maxWidth: .infinity).padding().background(sage).cornerRadius(14) }
                     Picker("Collection", selection: $saved) { Text("My posts").tag(false); Text("Saved").tag(true) }.pickerStyle(.segmented)
                     let posts = store.data.posts.filter { saved ? ($0.savedBy?.contains(person.handle) == true) : $0.handle == person.handle }
                     if posts.isEmpty { Text(saved ? "Posts you save appear here." : "Your first shared post will appear here.").foregroundColor(.secondary) }
@@ -34,21 +34,21 @@ struct Profile: View {
     }
 }
 
-struct BreakMenu: View {
+struct OpenHourMenu: View {
     @EnvironmentObject var store: Store
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SectionLabel(text: "Community schedule")
-                Text("Break menu").font(.largeTitle.bold())
-                Label("Daily break", systemImage: "clock").font(.headline)
+                Text("Open hour").font(.largeTitle.bold())
+                Label("Daily open period", systemImage: "clock").font(.headline)
                 VStack(alignment: .leading, spacing: 8) {
                     Text(hours[store.slot]).font(.title.bold())
                     Text(store.localSlot(store.slot))
                 }.padding().frame(maxWidth: .infinity, alignment: .leading).background(sage).cornerRadius(16)
-                Text("Everyone pauses at the same instant. Each account has one standing vote. The leading slot becomes active at midnight UTC.")
+                Text("Everyone can browse and post during this one-hour window. Each account has one standing vote. The leading slot becomes active at midnight UTC.")
                 if let vote = store.data.vote { Label("Your proposal: " + hours[vote], systemImage: "checkmark.circle") }
-                NavigationLink(destination: Vote()) { Text(store.data.vote == nil ? "Vote on break hours" : "Change your vote") }.buttonStyle(Primary())
+                NavigationLink(destination: Vote()) { Text(store.data.vote == nil ? "Vote on the open hour" : "Change your vote") }.buttonStyle(Primary())
             }.padding(20)
         }.background(paper)
     }
@@ -61,8 +61,8 @@ struct Vote: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Vote for break timeframe").font(.largeTitle.bold())
-                Text("Choose one universal daily break. Times below use UTC.")
+                Text("Vote for the open hour").font(.largeTitle.bold())
+                Text("Choose the hour everyone can use One Hour. Times below use UTC.")
                 ForEach(hours.indices, id: \.self) { i in
                     Button { choice = i } label: {
                         HStack { Image(systemName: choice == i ? "checkmark.circle.fill" : "circle")
@@ -78,6 +78,6 @@ struct Vote: View {
         }.background(paper).onAppear { choice = store.data.vote }
             .alert("Vote sent", isPresented: $confirmed) {
                 Button("OK") { dismiss() }
-            } message: { Text("Your preferred break hour has been recorded.") }
+            } message: { Text("Your preferred open hour has been recorded.") }
     }
 }

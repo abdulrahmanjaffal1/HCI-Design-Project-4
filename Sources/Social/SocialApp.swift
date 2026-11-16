@@ -57,25 +57,36 @@ struct Gate: View {
     @State private var now = Date()
     let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     var body: some View {
-        VStack(spacing: 0) {
-            Brand()
-            if !store.data.signedIn { AccountFlow() }
-            else if let interval = store.clock.active(at: max(now, Date())) {
-                VStack(spacing: 18) {
-                    Spacer()
-                    Image(systemName: "lock").font(.largeTitle).padding(30).background(sage).clipShape(Circle())
-                    Text("Time for a pause.").font(.largeTitle.bold())
-                    Text("Your feed, posts and profile reopen at " + time(interval.end) + ".").multilineTextAlignment(.center)
-                    VStack(spacing: 8) {
-                        SectionLabel(text: "Current break")
-                        Text(time(interval.start) + " – " + time(interval.end)).font(.title2.bold())
-                        Text("Reopens in " + remaining(interval.end)).monospacedDigit()
-                    }.padding().frame(maxWidth: .infinity).background(.white).cornerRadius(18)
-                    Text("Read a chapter or take a short walk. Your feed can wait.").foregroundColor(.secondary)
-                    Spacer()
-                }.padding(24)
-            } else { SocialTabs().id(store.data.active) }
+        let locked = store.data.signedIn && store.isLocked(at: now)
+        ZStack(alignment: .trailing) {
+            VStack(spacing: 0) {
+                Brand()
+                if store.data.signedIn { SocialTabs().id(store.data.active) }
+                else { AccountFlow() }
+            }
+            .disabled(locked)
+            .accessibilityHidden(locked)
+
+            if locked {
+                if StudyConfiguration.peerTesting {
+                    Button { store.manualLock = false } label: { lockScreen }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Showcase lockout. Dismiss and return to the app.")
+                } else { lockScreen }
+            } else if StudyConfiguration.peerTesting && store.data.signedIn {
+                Button {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                                    to: nil, from: nil, for: nil)
+                    store.manualLock = true
+                } label: {
+                    Image(systemName: "lock.fill").font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white).frame(width: 24, height: 24)
+                        .background(forest).clipShape(Circle())
+                        .frame(width: 44, height: 44).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityLabel("Show showcase lockout")
+            }
         }.frame(maxWidth: .infinity, maxHeight: .infinity).background(paper)
+            .ignoresSafeArea(.keyboard)
             .overlay { if phase != .active { paper.ignoresSafeArea().accessibilityHidden(true) } }
             .onReceive(tick) { now = $0 }
             .onChange(of: phase) { _ in now = Date() }
@@ -83,13 +94,19 @@ struct Gate: View {
                 Button("OK") { store.error = nil }
             } message: { Text(store.error ?? "") }
     }
-    func time(_ date: Date) -> String {
-        let f = DateFormatter(); f.timeStyle = .short; f.timeZone = TimeZone(identifier: store.data.person?.zone ?? "") ?? .current
-        return f.string(from: date)
-    }
-    func remaining(_ end: Date) -> String {
-        let seconds = max(0, Int(ceil(end.timeIntervalSince(now))))
-        return String(format: "%d:%02d", seconds/60, seconds%60)
+    var lockScreen: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "lock").font(.largeTitle).padding(30).background(sage).clipShape(Circle())
+            Text("Time for a pause.").font(.largeTitle.bold())
+            SectionLabel(text: "Community open hour")
+            Text(hours[store.slot]).font(.title2.bold())
+            Text(store.localSlot(store.slot))
+            if StudyConfiguration.peerTesting {
+                Text("Tap anywhere to return").foregroundColor(.secondary)
+            }
+        }.multilineTextAlignment(.center).padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(paper.ignoresSafeArea()).contentShape(Rectangle())
     }
 }
 struct SocialTabs: View {

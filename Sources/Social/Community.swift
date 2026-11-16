@@ -51,7 +51,6 @@ struct Archive: Codable {
     var active: String?
     var follows: [String: Set<String>] = [:]
     var poll = UniversalPoll()
-    var demoStart: Date?
     var person: Person? { people.first { $0.handle == active } }
     var signedIn: Bool { person != nil }
     var vote: Int? { active.flatMap { poll.ballots[$0] } }
@@ -62,10 +61,9 @@ struct Archive: Codable {
     func conversation(_ peer: String) -> [DirectMessage] {
         messages.filter { ($0.sender == active && $0.recipient == peer) || ($0.sender == peer && $0.recipient == active) }
     }
-    mutating func activate(_ person: Person, demo: Bool) {
+    mutating func activate(_ person: Person) {
         remembered.insert(person.handle)
         active = person.handle
-        if demo && demoStart == nil { demoStart = Date() }
     }
     static let names = ["Maya Chen","Sam Rivera","Nina Park","Jordan Lee","Alex Shah","Iris Kim","Taylor Kim","Casey Brooks","Robin Ellis"]
     static func seeded(avoiding reserved: Person? = nil) -> Archive {

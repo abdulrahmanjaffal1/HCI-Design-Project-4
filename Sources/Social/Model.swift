@@ -41,9 +41,11 @@ let trim: (String) -> String = { $0.trimmingCharacters(in: .whitespacesAndNewlin
             db = database
         } catch { self.error = error.localizedDescription }
     }
-    var clock: BreakClock {
-        BreakClock(zone: TimeZone(secondsFromGMT: 0)!, demoStart: StudyConfiguration.acceleratedBreak ? data.demoStart : nil,
-                   hour: UniversalPoll.slots[data.poll.slot(at: Date())])
+    @Published var manualLock = false
+    func isLocked(at date: Date) -> Bool {
+        let slot = data.poll.slot(at: date)
+        let clock = BreakClock(zone: TimeZone(secondsFromGMT: 0)!, hour: UniversalPoll.slots[slot])
+        return clock.isLocked(at: date, peerTesting: StudyConfiguration.peerTesting, manualLock: manualLock)
     }
     var slot: Int { data.poll.slot(at: Date()) }
     func localSlot(_ index: Int) -> String {
@@ -54,8 +56,8 @@ let trim: (String) -> String = { $0.trimmingCharacters(in: .whitespacesAndNewlin
         return format.string(from: start) + "–" + format.string(from: start.addingTimeInterval(3600)) + " · " + format.timeZone.identifier
     }
     @discardableResult func change(protected: Bool = true, _ edit: (inout Archive) -> Void) -> Bool {
-        guard let db = db else { error = "Database unavailable. Reopen Social and try again."; return false }
-        guard !protected || (data.signedIn && clock.active(at: Date()) == nil) else { return false }
+        guard let db = db else { error = "Database unavailable. Reopen One Hour and try again."; return false }
+        guard !protected || (data.signedIn && !isLocked(at: Date())) else { return false }
         var next = data
         next.poll.advance(to: Date())
         edit(&next)

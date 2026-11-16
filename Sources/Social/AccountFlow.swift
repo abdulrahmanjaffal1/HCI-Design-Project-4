@@ -48,7 +48,7 @@ struct AccountFlow: View {
                     PhotosPicker("Choose from Photos", selection: $photo, matching: .images)
                     Button("Use avatar", action: advance).buttonStyle(Primary())
                 } else if step == 3 {
-                    Text("Use this time zone to display the universal break on your profile.")
+                    Text("Use this time zone to display the universal open hour on your profile.")
                     TextField("Search city or time zone", text: $search)
                     Text(person.zone.replacingOccurrences(of: "_", with: " ")).font(.headline)
                     ForEach(zones, id: \.self) { zone in
@@ -69,7 +69,7 @@ struct AccountFlow: View {
                         guard store.data.account(person.handle) == nil && store.data.account(person.email) == nil else { message = "Username or email already in use."; return }
                         guard Credential.save(password, account: person.email) else { message = "Couldn’t save your local login. Try again."; return }
                         store.change(protected: false) {
-                            $0.people.append(person); $0.activate(person, demo: StudyConfiguration.acceleratedBreak)
+                            $0.people.append(person); $0.activate(person)
                         }
                     }.buttonStyle(Primary())
                 }
@@ -128,7 +128,7 @@ struct AccountFlow: View {
         person.email = trim(person.email).lowercased()
         if returning {
             if let account = store.data.account(person.email), Credential.matches(password, account: account.email) {
-                store.change(protected: false) { $0.activate(account, demo: StudyConfiguration.acceleratedBreak) }
+                store.change(protected: false) { $0.activate(account) }
             } else { message = "Check your email and password." }
             return
         }

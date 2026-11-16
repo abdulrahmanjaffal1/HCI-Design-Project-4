@@ -9,7 +9,6 @@ final class CommunityDB {
     private struct Settings: Codable {
         var remembered: Set<String>?
         var active: String?
-        var demoStart: Date?
         var follows: [String: Set<String>]
         var poll: UniversalPoll
     }
@@ -51,7 +50,7 @@ final class CommunityDB {
         d.posts = try read("posts", as: Moment.self)
         d.messages = try read("messages", as: DirectMessage.self)
         d.remembered = s.remembered ?? Set([s.active].compactMap { $0 })
-        d.active = s.active; d.follows = s.follows; d.poll = s.poll; d.demoStart = s.demoStart
+        d.active = s.active; d.follows = s.follows; d.poll = s.poll
         return d
     }
     private func insert<T: Encodable>(_ value: T, into table: String, person: Person? = nil) throws {
@@ -76,7 +75,7 @@ final class CommunityDB {
             for p in d.people { try insert(p, into: "profiles", person: p) }
             for p in d.posts { try insert(p, into: "posts") }
             for m in d.messages { try insert(m, into: "messages") }
-            try insert(Settings(remembered: d.remembered, active: d.active, demoStart: d.demoStart, follows: d.follows, poll: d.poll), into: "settings")
+            try insert(Settings(remembered: d.remembered, active: d.active, follows: d.follows, poll: d.poll), into: "settings")
             try exec("COMMIT")
         } catch { try? exec("ROLLBACK"); throw error }
     }
@@ -90,8 +89,7 @@ final class CommunityDB {
             let person: Person?
             let signedIn: Bool
             let vote: Int?
-            let demoStart: Date?
-            let posts: [Moment]
+                let posts: [Moment]
             let threads: [Thread]
         }
         guard FileManager.default.fileExists(atPath: url.path) else { return .seeded() }
@@ -101,7 +99,6 @@ final class CommunityDB {
         d.people.append(owner)
         d.active = old.signedIn ? owner.handle : nil
         if old.signedIn { d.remembered.insert(owner.handle) }
-        d.demoStart = old.demoStart
         if let vote = old.vote, UniversalPoll.slots.indices.contains(vote) { d.poll.ballots[owner.handle] = vote }
         d.posts = old.posts.map { post in
             var p = post

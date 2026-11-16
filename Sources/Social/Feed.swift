@@ -14,12 +14,12 @@ struct Feed: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                NavigationLink(destination: BreakMenu()) {
+                NavigationLink(destination: OpenHourMenu()) {
                     HStack {
                         Image(systemName: "clock")
                         VStack(alignment: .leading) {
-                            Text("Break window").font(.headline)
-                            Text(StudyConfiguration.acceleratedBreak ? "Timed classroom demonstration" : hours[store.slot]).font(.caption)
+                            Text("1-hour open period").font(.headline)
+                            Text(hours[store.slot]).font(.caption)
                         }; Spacer(); Image(systemName: "chevron.right")
                     }.padding().background(sage).cornerRadius(14)
                 }

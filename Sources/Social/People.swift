@@ -47,13 +47,17 @@ struct EditProfile: View {
     @State var person: Person
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoError = ""
+    init(person: Person) {
+        _person = State(initialValue: person)
+    }
+
     var body: some View {
         Form {
             Section("Display name") { TextField("Name", text: $person.name) }
             Section("Bio") { TextField("About you", text: Binding(get: { person.bio ?? "" }, set: { person.bio = $0 }), axis: .vertical) }
             Section("Profile picture") {
                 Portrait(person: person)
-                PhotosPicker("Change photo", selection: $selectedPhoto, matching: .images)
+                PhotosPicker("Change profile picture", selection: $selectedPhoto, matching: .images)
                 if selectedPhoto != nil { ProgressView("Loading photo…") }
                 if person.photo != nil {
                     Button("Remove photo", role: .destructive) {

@@ -1,4 +1,4 @@
 enum StudyConfiguration {
-    // For a timed demonstration, set true before building a separate demo copy.
-    static let acceleratedBreak = false
+    // Peer testing uses the floating lock button. Set false to enforce the elected UTC open hour.
+    static let peerTesting = true
 }
