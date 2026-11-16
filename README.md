@@ -2,6 +2,8 @@
 
 An iOS photo community for multi-participant HCI testing on a shared iPhone. Accounts, posts, comment threads, likes, follows, saved posts, private conversations and votes persist in **one SQLite database on that installation**. Passwords are stored separately in the iOS Keychain. A second device has its own independent study dataset.
 
+[video demonstration link](https://www.youtube.com/watch?v=0j9VgdKusfI)
+
 ## Sign in, switch or create an account
 
 | Username | Password | Profile |
